@@ -1,1 +1,443 @@
+:root {
+    --bg-deep-space: #050608;
+    --glass-background: rgba(10, 12, 16, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.05);
+    --glass-border-hover: rgba(255, 255, 255, 0.15);
+    --neon-alert-red: #ff3b30;
+    --neon-cyber-green: #34c759;
+    --text-primary: #f5f6f9;
+    --text-secondary: #9ea4b0;
+    --text-dark-subtle: #4a505c;
+    --main-radius: 32px;
+    --inner-radius: 16px;
+    --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
 
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-deep-space);
+    color: var(--text-primary);
+    font-family: var(--font-stack);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+#RenderCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.OrbMatrix {
+    position: fixed;
+    border-radius: 50%;
+    z-index: 1;
+    pointer-events: none;
+    filter: blur(120px);
+    opacity: 0.15;
+}
+
+.AppOrb1 {
+    top: -20%;
+    left: -10%;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, #ff007f 0%, transparent 80%);
+}
+
+.AppOrb2 {
+    bottom: -30%;
+    right: -10%;
+    width: 70vw;
+    height: 70vw;
+    background: radial-gradient(circle, #00f0ff 0%, transparent 80%);
+}
+
+.AppOrb3 {
+    top: 40%;
+    left: 50%;
+    width: 45vw;
+    height: 45vw;
+    background: radial-gradient(circle, #7000ff 0%, transparent 80%);
+}
+
+.GlobalLocaleWrapper {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+
+.LocaleNode {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.LocaleNode:hover {
+    border-color: var(--glass-border-hover);
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.LocaleNode.ActiveLocale {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+.GlassContainer {
+    width: 100%;
+    background: var(--glass-background);
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--main-radius);
+    box-shadow: 0 50px 120px rgba(0, 0, 0, 0.85), 
+                inset 0 1px 2px rgba(255, 255, 255, 0.05);
+    z-index: 10;
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.8s;
+}
+
+.MainGatekeeper {
+    max-width: 520px;
+    padding: 50px;
+    text-align: center;
+    transform: scale(1);
+    opacity: 1;
+    visibility: visible;
+}
+
+.MainGatekeeper.hidden {
+    opacity: 0;
+    transform: scale(0.95);
+    visibility: hidden;
+    pointer-events: none;
+    position: absolute;
+}
+
+.GlitchHeaderWrapper h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: #ffffff;
+    margin-bottom: 16px;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.MainGatekeeper p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 36px;
+}
+
+.WarningMetricsPanel {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    border-radius: var(--inner-radius);
+    padding: 24px;
+    margin-bottom: 40px;
+    text-align: left;
+}
+
+.MetricRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+}
+
+.MetricRow:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.MetricRow span:last-child {
+    color: #ffffff;
+    font-family: monospace;
+}
+
+.MetricRow .ValueAlert {
+    color: var(--neon-alert-red);
+    text-shadow: 0 0 10px rgba(255, 60, 48, 0.3);
+}
+
+.HyperActionBtn {
+    width: 100%;
+    background: #ffffff;
+    color: var(--bg-deep-space);
+    border: none;
+    padding: 18px 32px;
+    border-radius: var(--inner-radius);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.HyperActionBtn:hover {
+    background: #e2e8f0;
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(255, 255, 255, 0.2);
+}
+
+.HyperActionBtn:active {
+    transform: translateY(0);
+}
+
+.CoreDashboard {
+    max-width: 1100px;
+    padding: 50px;
+    opacity: 0;
+    transform: scale(1.05);
+    visibility: hidden;
+    position: absolute;
+    pointer-events: none;
+}
+
+.CoreDashboard.active {
+    opacity: 1;
+    transform: scale(1);
+    visibility: visible;
+    pointer-events: auto;
+    position: relative;
+}
+
+.DashboardHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 44px;
+}
+
+.SystemPulseNode {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+}
+
+.PulseCore {
+    width: 6px;
+    height: 6px;
+    background-color: var(--neon-cyber-green);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--neon-cyber-green);
+    animation: corePulseAnimation 2s infinite ease-in-out;
+}
+
+@keyframes corePulseAnimation {
+    0% { opacity: 0.3; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0.3; transform: scale(0.9); }
+}
+
+.DashboardHeader h2 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+}
+
+.GridMetricsLayout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.GridNodeCard {
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--inner-radius);
+    padding: 24px;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.GridNodeCard:hover {
+    border-color: var(--glass-border-hover);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.GridNodeCard h3 {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+}
+
+.StatDisplay {
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-family: monospace;
+    color: #ffffff;
+    margin-bottom: 14px;
+}
+
+.MiniProgressWrapper {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.ProgressBar {
+    height: 100%;
+    width: 0%;
+    background: #ffffff;
+    border-radius: 2px;
+    transition: width 0.1s linear;
+}
+
+.InteractiveControlSuite {
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    border-radius: var(--inner-radius);
+    padding: 30px;
+    margin-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.SliderComponent {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.SliderComponent label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+}
+
+.SliderComponent input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+    outline: none;
+}
+
+.SliderComponent input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.SliderComponent input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.TerminalConsoleFooter {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.TerminalStreamOutput {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: var(--inner-radius);
+    padding: 20px;
+    height: 120px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    text-align: left;
+}
+
+.TerminalStreamOutput::-webkit-scrollbar {
+    width: 6px;
+}
+
+.TerminalStreamOutput::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.TerminalActionBtn {
+    background: transparent;
+    border: 1px solid var(--neon-alert-red);
+    color: var(--neon-alert-red);
+    padding: 16px 32px;
+    border-radius: var(--inner-radius);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.TerminalActionBtn:hover {
+    background: var(--neon-alert-red);
+    color: #ffffff;
+    box-shadow: 0 10px 25px rgba(255, 60, 48, 0.3);
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 60px 16px 30px;
+        overflow-y: auto;
+    }
+    .MainGatekeeper, .CoreDashboard {
+        padding: 30px 20px;
+    }
+    .DashboardHeader h2 {
+        font-size: 1.8rem;
+    }
+}
